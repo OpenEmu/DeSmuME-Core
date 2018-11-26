@@ -28,25 +28,27 @@
 	<string>OEGameCoreController</string>
 	<key>OEGameCoreClass</key>
 	<string>NDSGameCore</string>
-	<key>OEGameCorePlayerCount</key>
-	<string>1</string>
 	<key>OEGameCoreOptions</key>
 	<dict>
 		<key>openemu.system.nds</key>
 		<dict>
 			<key>OEGameCoreSupportsCheatCode</key>
 			<true/>
+			<key>OEGameCoreSupportsDisplayModeChange</key>
+			<true/>
 		</dict>
 	</dict>
+	<key>OEGameCorePlayerCount</key>
+	<string>1</string>
 	<key>OEProjectURL</key>
 	<string>http://desmume.org/</string>
 	<key>OESystemIdentifiers</key>
 	<array>
 		<string>openemu.system.nds</string>
 	</array>
-	<key>SUFeedURL</key>
-	<string>https://raw.github.com/OpenEmu/OpenEmu-Update/master/desmume_appcast.xml</string>
 	<key>SUEnableAutomaticChecks</key>
 	<string>1</string>
+	<key>SUFeedURL</key>
+	<string>https://raw.github.com/OpenEmu/OpenEmu-Update/master/desmume_appcast.xml</string>
 </dict>
 </plist>

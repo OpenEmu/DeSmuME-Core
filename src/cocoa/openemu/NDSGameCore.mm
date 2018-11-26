@@ -30,6 +30,13 @@
 #include "../../GPU.h"
 #undef BOOL
 
+#define OptionDefault(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @YES, }
+#define Option(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, }
+#define OptionIndented(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeIndentationLevelKey : @(1), }
+#define OptionToggleable(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeAllowsToggleKey : @YES, }
+#define OptionToggleableNoSave(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeAllowsToggleKey : @YES, OEGameCoreDisplayModeDisallowPrefSaveKey : @YES, }
+#define Label(_NAME_) @{ OEGameCoreDisplayModeLabelKey : _NAME_, }
+#define SeparatorItem() @{ OEGameCoreDisplayModeSeparatorItemKey : @"",}
 
 volatile bool execute = true;
 
@@ -152,7 +159,7 @@ volatile bool execute = true;
 			break;
 			
 		case DS_DISPLAY_TYPE_TOUCH:
-			newDisplayRect = OEIntRectMake(0, GPU_DISPLAY_HEIGHT + 1, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
+			newDisplayRect = OEIntRectMake(0, GPU_DISPLAY_HEIGHT, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
 			newDisplayAspectRatio = OEIntSizeMake(4, 3);
 			break;
 			
@@ -224,6 +231,11 @@ volatile bool execute = true;
 	isRomLoaded = [CocoaDSFile loadRom:[NSURL fileURLWithPath:path]];
 	
 	[CocoaDSCheatManager setMasterCheatList:cdsCheats];
+
+    // Only temporary, so core doesn't crash on an older OpenEmu version
+    if ([self respondsToSelector:@selector(displayModeInfo)]) {
+        [self loadDisplayModeOptions];
+    }
 	
 	return isRomLoaded;
 }
@@ -284,28 +296,6 @@ volatile bool execute = true;
 - (NSTimeInterval)frameInterval
 {
 	return DS_FRAMES_PER_SECOND;
-}
-
-- (void)changeDisplayMode
-{
-	switch (displayMode)
-    {
-        case DS_DISPLAY_TYPE_MAIN:
-            [self setDisplayMode:DS_DISPLAY_TYPE_TOUCH];
-            break;
-			
-        case DS_DISPLAY_TYPE_TOUCH:
-            [self setDisplayMode:DS_DISPLAY_TYPE_DUAL];
-            break;
-			
-        case DS_DISPLAY_TYPE_DUAL:
-            [self setDisplayMode:DS_DISPLAY_TYPE_MAIN];
-            break;
-			
-        default:
-            return;
-            break;
-    }
 }
 
 #pragma mark Audio
@@ -433,6 +423,77 @@ volatile bool execute = true;
 {
     // TODO: error handling
     block([CocoaDSFile loadState:[NSURL fileURLWithPath:fileName]], nil);
+}
+
+#pragma mark - Display Mode
+
+- (NSArray <NSDictionary <NSString *, id> *> *)displayModes
+{
+    if (_availableDisplayModes.count == 0)
+    {
+        _availableDisplayModes = [NSMutableArray array];
+
+        NSArray <NSDictionary <NSString *, id> *> *availableModesWithDefault =
+        @[
+          Label(@"Screen"),
+          OptionDefault(@"Dual", @"screen"),
+          Option(@"Main", @"screen"),
+          Option(@"Touch", @"screen"),
+          ];
+
+        // Deep mutable copy
+        _availableDisplayModes = (NSMutableArray *)CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFArrayRef)availableModesWithDefault, kCFPropertyListMutableContainers));
+    }
+
+    return [_availableDisplayModes copy];
+}
+
+- (void)changeDisplayWithMode:(NSString *)currentDisplayMode
+{
+    if (_availableDisplayModes.count == 0)
+        [self displayModes];
+
+    // First check if 'displayMode' is valid
+    BOOL isValidDisplayMode = NO;
+
+    for (NSDictionary *modeDict in _availableDisplayModes) {
+        if ([modeDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode]) {
+            isValidDisplayMode = YES;
+            break;
+        }
+    }
+
+    // Disallow a 'displayMode' not found in _availableDisplayModes
+    if (!isValidDisplayMode)
+        return;
+
+    // Handle option state changes
+    for (NSMutableDictionary *optionDict in _availableDisplayModes) {
+        if (!optionDict[OEGameCoreDisplayModeNameKey])
+            continue;
+        // Mutually exclusive option state change
+        else if ([optionDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode])
+            optionDict[OEGameCoreDisplayModeStateKey] = @YES;
+        // Reset
+        else
+            optionDict[OEGameCoreDisplayModeStateKey] = @NO;
+    }
+
+    if ([currentDisplayMode isEqualToString:@"Dual"])
+        [self setDisplayMode:DS_DISPLAY_TYPE_DUAL];
+    else if ([currentDisplayMode isEqualToString:@"Main"])
+        [self setDisplayMode:DS_DISPLAY_TYPE_MAIN];
+    else if ([currentDisplayMode isEqualToString:@"Touch"])
+        [self setDisplayMode:DS_DISPLAY_TYPE_TOUCH];
+}
+
+- (void)loadDisplayModeOptions
+{
+    // Restore screen
+    NSString *lastScreen = self.displayModeInfo[@"screen"];
+    if (lastScreen && ![lastScreen isEqualToString:@"Dual"]) {
+        [self changeDisplayWithMode:lastScreen];
+    }
 }
 
 #pragma mark Miscellaneous
