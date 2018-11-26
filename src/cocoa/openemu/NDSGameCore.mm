@@ -193,16 +193,6 @@ volatile bool execute = true;
 	execute = true;
 }
 
-- (void)executeFrameSkippingFrame:(BOOL)skip
-{
-	if (skip)
-	{
-		NDS_SkipNextFrame();
-	}
-	
-	[self executeFrame];
-}
-
 - (void)executeFrame
 {
 	[cdsController flush];
@@ -217,7 +207,7 @@ volatile bool execute = true;
 	SPU_Emulate_user();
 }
 
-- (BOOL)loadFileAtPath:(NSString*)path
+- (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
 {
 	BOOL isRomLoaded = NO;
 	NSString *openEmuDataPath = [self batterySavesDirectoryPath];
@@ -277,8 +267,11 @@ volatile bool execute = true;
 	return OEIntSizeMake(GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
 }
 
-- (const void *)videoBuffer
+- (const void *)getVideoBufferWithHint:(void *)hint
 {
+    // TODO
+    //_gpuFrame.buffer = (uint16_t *)hint;
+    //return hint;
 	return GPU_screen;
 }
 
@@ -294,7 +287,7 @@ volatile bool execute = true;
 
 - (GLenum)internalPixelFormat
 {
-	return GL_RGB5_A1;
+    return GL_RGB5_A1;
 }
 
 - (NSTimeInterval)frameInterval
@@ -439,14 +432,16 @@ volatile bool execute = true;
 
 #pragma mark Save State
 
-- (BOOL)saveStateToFileAtPath:(NSString *)fileName
+- (void)saveStateToFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-	return [CocoaDSFile saveState:[NSURL fileURLWithPath:fileName]];
+    // TODO: error handling
+    block([CocoaDSFile saveState:[NSURL fileURLWithPath:fileName]], nil);
 }
 
-- (BOOL)loadStateFromFileAtPath:(NSString *)fileName
+- (void)loadStateFromFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-	return [CocoaDSFile loadState:[NSURL fileURLWithPath:fileName]];
+    // TODO: error handling
+    block([CocoaDSFile loadState:[NSURL fileURLWithPath:fileName]], nil);
 }
 
 #pragma mark Miscellaneous
