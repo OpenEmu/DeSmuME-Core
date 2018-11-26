@@ -45,10 +45,10 @@
 	pthread_rwlock_t rwlockCoreExecute;
 }
 
-@property (retain) CocoaDSCheatManager *cdsCheats;
-@property (retain) CocoaDSController *cdsController;
-@property (retain) CocoaDSGPU *cdsGPU;
-@property (retain) CocoaDSFirmware *cdsFirmware;
+@property (strong) CocoaDSCheatManager *cdsCheats;
+@property (strong) CocoaDSController *cdsController;
+@property (strong) CocoaDSGPU *cdsGPU;
+@property (strong) CocoaDSFirmware *cdsFirmware;
 @property (assign) NSInteger displayMode;
 
 @end

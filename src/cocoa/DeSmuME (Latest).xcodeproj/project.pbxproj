@@ -15,7 +15,7 @@
 		AB01005E170D07B000D70FBE /* InputProfileController.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB01005D170D07B000D70FBE /* InputProfileController.mm */; };
 		AB01005F170D07B000D70FBE /* InputProfileController.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB01005D170D07B000D70FBE /* InputProfileController.mm */; };
 		AB02475C13886BF300E9F9AB /* KeyNames.plist in Resources */ = {isa = PBXBuildFile; fileRef = AB02475B13886BF300E9F9AB /* KeyNames.plist */; };
-		AB031B5518472F3100541888 /* cocoa_cheat.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABA6574A14511EC90077E5E9 /* cocoa_cheat.mm */; };
+		AB031B5518472F3100541888 /* cocoa_cheat.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABA6574A14511EC90077E5E9 /* cocoa_cheat.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		AB0F290214BE6E68009ABC6F /* Icon_Execute_420x420.png in Resources */ = {isa = PBXBuildFile; fileRef = AB0F28FE14BE6E68009ABC6F /* Icon_Execute_420x420.png */; };
 		AB0F290314BE6E68009ABC6F /* Icon_Pause_420x420.png in Resources */ = {isa = PBXBuildFile; fileRef = AB0F28FF14BE6E68009ABC6F /* Icon_Pause_420x420.png */; };
 		AB0F290414BE6E68009ABC6F /* Icon_Speed1x_420x420.png in Resources */ = {isa = PBXBuildFile; fileRef = AB0F290014BE6E68009ABC6F /* Icon_Speed1x_420x420.png */; };
@@ -95,7 +95,7 @@
 		AB3A655F16CC5421001F5D4A /* EmuControllerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3A655D16CC5421001F5D4A /* EmuControllerDelegate.mm */; };
 		AB3A656116CC5438001F5D4A /* cocoa_GPU.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3A656016CC5438001F5D4A /* cocoa_GPU.mm */; };
 		AB3A656216CC5438001F5D4A /* cocoa_GPU.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3A656016CC5438001F5D4A /* cocoa_GPU.mm */; };
-		AB3A656316CC5438001F5D4A /* cocoa_GPU.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3A656016CC5438001F5D4A /* cocoa_GPU.mm */; };
+		AB3A656316CC5438001F5D4A /* cocoa_GPU.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3A656016CC5438001F5D4A /* cocoa_GPU.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		AB3ACB7214C2361100D7D192 /* appDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3ACB6714C2361100D7D192 /* appDelegate.mm */; };
 		AB3ACB7314C2361100D7D192 /* cheatWindowDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3ACB6914C2361100D7D192 /* cheatWindowDelegate.mm */; };
 		AB3ACB7614C2361100D7D192 /* inputPrefsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB3ACB6F14C2361100D7D192 /* inputPrefsView.mm */; };
@@ -202,7 +202,7 @@
 		AB4FCEBF1692AB82000F498F /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4FCEBC1692AB82000F498F /* Accelerate.framework */; };
 		AB5648FF186E6EA8002740F4 /* cocoa_slot2.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB5648FE186E6EA8002740F4 /* cocoa_slot2.mm */; };
 		AB564900186E6EA8002740F4 /* cocoa_slot2.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB5648FE186E6EA8002740F4 /* cocoa_slot2.mm */; };
-		AB564901186E6EA8002740F4 /* cocoa_slot2.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB5648FE186E6EA8002740F4 /* cocoa_slot2.mm */; };
+		AB564901186E6EA8002740F4 /* cocoa_slot2.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB5648FE186E6EA8002740F4 /* cocoa_slot2.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		AB564904186E6EBC002740F4 /* Slot2WindowDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB564903186E6EBC002740F4 /* Slot2WindowDelegate.mm */; };
 		AB564905186E6EBC002740F4 /* Slot2WindowDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB564903186E6EBC002740F4 /* Slot2WindowDelegate.mm */; };
 		AB564907186E6F0C002740F4 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB564906186E6F0C002740F4 /* ForceFeedback.framework */; };
@@ -772,8 +772,8 @@
 		ABB3C66A1501BF8A00E0C22E /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB0A0D1914AACA9600E83E91 /* libz.dylib */; };
 		ABB3C66C1501C04F00E0C22E /* NDSGameCore.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABB3C63E1501BB8300E0C22E /* NDSGameCore.mm */; };
 		ABB3C6701501C04F00E0C22E /* videofilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB817A35143EE2DB00A7DFE9 /* videofilter.cpp */; };
-		ABB3C6721501C04F00E0C22E /* cocoa_file.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB58F32C1364F44B0074C376 /* cocoa_file.mm */; };
-		ABB3C6751501C04F00E0C22E /* cocoa_rom.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABD104131346652500AF11D1 /* cocoa_rom.mm */; };
+		ABB3C6721501C04F00E0C22E /* cocoa_file.mm in Sources */ = {isa = PBXBuildFile; fileRef = AB58F32C1364F44B0074C376 /* cocoa_file.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		ABB3C6751501C04F00E0C22E /* cocoa_rom.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABD104131346652500AF11D1 /* cocoa_rom.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		ABB3C6781501C04F00E0C22E /* slot1_none.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FF001345AC9B00AF11D1 /* slot1_none.cpp */; };
 		ABB3C6791501C04F00E0C22E /* slot1_r4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FF011345AC9B00AF11D1 /* slot1_r4.cpp */; };
 		ABB3C67A1501C04F00E0C22E /* slot1_retail_nand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB6FBEF5139B6258007BB045 /* slot1_retail_nand.cpp */; };
@@ -900,7 +900,7 @@
 		ABD10AEB1715FCDD00B5729D /* mic_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD10AE61715FCDD00B5729D /* mic_ext.cpp */; };
 		ABD10AEC1715FCDD00B5729D /* mic_ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD10AE61715FCDD00B5729D /* mic_ext.cpp */; };
 		ABD10AED17160C9300B5729D /* ringbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB1B9E601501A78000464647 /* ringbuffer.cpp */; };
-		ABD10AEE17160CDD00B5729D /* cocoa_input.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABD104111346652500AF11D1 /* cocoa_input.mm */; };
+		ABD10AEE17160CDD00B5729D /* cocoa_input.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABD104111346652500AF11D1 /* cocoa_input.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		ABD1FED21345AC8400AF11D1 /* arm_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FEA31345AC8400AF11D1 /* arm_instructions.cpp */; };
 		ABD1FED31345AC8400AF11D1 /* armcpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FEA41345AC8400AF11D1 /* armcpu.cpp */; };
 		ABD1FED41345AC8400AF11D1 /* bios.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FEA51345AC8400AF11D1 /* bios.cpp */; };
@@ -984,7 +984,7 @@
 		ABE6840C189E33BC007FD69C /* OGLDisplayOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABE6840B189E33BC007FD69C /* OGLDisplayOutput.cpp */; };
 		ABE6840D189E33BC007FD69C /* OGLDisplayOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABE6840B189E33BC007FD69C /* OGLDisplayOutput.cpp */; };
 		ABE7F53E13EE1C7900FD3A71 /* cocoa_firmware.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABE7F53D13EE1C7900FD3A71 /* cocoa_firmware.mm */; };
-		ABE9EEEA1501C6EB00D3FB19 /* cocoa_firmware.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABE7F53D13EE1C7900FD3A71 /* cocoa_firmware.mm */; };
+		ABE9EEEA1501C6EB00D3FB19 /* cocoa_firmware.mm in Sources */ = {isa = PBXBuildFile; fileRef = ABE7F53D13EE1C7900FD3A71 /* cocoa_firmware.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		ABE9EEEB1501C78700D3FB19 /* fs-linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABD1FEB21345AC8400AF11D1 /* fs-linux.cpp */; };
 		ABEFCF61141AB82A000CC0CD /* AppIcon_ROMSave.icns in Resources */ = {isa = PBXBuildFile; fileRef = ABEFCF5D141AB82A000CC0CD /* AppIcon_ROMSave.icns */; };
 		ABEFCF62141AB82A000CC0CD /* AppIcon_DeSmuME.icns in Resources */ = {isa = PBXBuildFile; fileRef = ABEFCF5E141AB82A000CC0CD /* AppIcon_DeSmuME.icns */; };
@@ -3596,6 +3596,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/openemu\"",
@@ -3613,6 +3614,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/openemu\"",
