@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		057577C9236A6B6900254B6A /* coreaudiosound_null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 057577C7236A6B6900254B6A /* coreaudiosound_null.cpp */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		AB0038A71872A96700B0B055 /* Image_PaddleController.png in Resources */ = {isa = PBXBuildFile; fileRef = AB0038A61872A96700B0B055 /* Image_PaddleController.png */; };
 		AB0038A81872A96700B0B055 /* Image_PaddleController.png in Resources */ = {isa = PBXBuildFile; fileRef = AB0038A61872A96700B0B055 /* Image_PaddleController.png */; };
@@ -878,7 +879,6 @@
 		ABC503AD1AAC2B71002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png in Resources */ = {isa = PBXBuildFile; fileRef = ABC503AC1AAC2B71002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png */; };
 		ABC503AE1AAC2B90002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png in Resources */ = {isa = PBXBuildFile; fileRef = ABC503AC1AAC2B71002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png */; };
 		ABC503AF1AAC2B91002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png in Resources */ = {isa = PBXBuildFile; fileRef = ABC503AC1AAC2B71002FCD43 /* Icon_MicrophoneDarkGreen_256x256.png */; };
-		ABC503B01AAC42C2002FCD43 /* coreaudiosound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB1B9E5F1501A78000464647 /* coreaudiosound.cpp */; };
 		ABC503B11AAC4355002FCD43 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB0FBC41A9E5CEA0060C55A /* CoreAudio.framework */; };
 		ABC570D1134431CE00E7B0B1 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABC570D0134431CE00E7B0B1 /* AudioUnit.framework */; };
 		ABC570D5134431DA00E7B0B1 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABC570D4134431DA00E7B0B1 /* OpenGL.framework */; };
@@ -1002,6 +1002,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		057577C7236A6B6900254B6A /* coreaudiosound_null.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = coreaudiosound_null.cpp; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -1865,6 +1866,7 @@
 				ABB3C6401501BB8300E0C22E /* OESoundInterface.mm */,
 				ABB3C63B1501BB8300E0C22E /* DeSmuME_Prefix_OpenEmu.pch */,
 				ABB3C63C1501BB8300E0C22E /* Info (OpenEmu Plug-in).plist */,
+				057577C7236A6B6900254B6A /* coreaudiosound_null.cpp */,
 			);
 			path = openemu;
 			sourceTree = "<group>";
@@ -3377,7 +3379,6 @@
 				ABB3C6821501C04F00E0C22E /* slot2_piano.cpp in Sources */,
 				ABB3C6831501C04F00E0C22E /* slot2_rumblepak.cpp in Sources */,
 				ABB3C6841501C04F00E0C22E /* 2xsai.cpp in Sources */,
-				ABC503B01AAC42C2002FCD43 /* coreaudiosound.cpp in Sources */,
 				ABB3C6851501C04F00E0C22E /* bilinear.cpp in Sources */,
 				ABB3C6861501C04F00E0C22E /* epx.cpp in Sources */,
 				ABB3C6871501C04F00E0C22E /* hq2x.cpp in Sources */,
@@ -3389,6 +3390,7 @@
 				ABB3C68D1501C04F00E0C22E /* FIFOSampleBuffer.cpp in Sources */,
 				AB9038A817C5ECFD00F410BD /* advanscene.cpp in Sources */,
 				ABB3C68E1501C04F00E0C22E /* FIRFilter.cpp in Sources */,
+				057577C9236A6B6900254B6A /* coreaudiosound_null.cpp in Sources */,
 				ABB3C68F1501C04F00E0C22E /* mmx_optimized.cpp in Sources */,
 				ABB3C6901501C04F00E0C22E /* RateTransposer.cpp in Sources */,
 				ABB3C6911501C04F00E0C22E /* SoundTouch.cpp in Sources */,
