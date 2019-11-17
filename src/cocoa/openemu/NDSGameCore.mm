@@ -35,6 +35,8 @@
 #define OptionIndented(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeIndentationLevelKey : @(1), }
 #define OptionToggleable(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeAllowsToggleKey : @YES, }
 #define OptionToggleableNoSave(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeAllowsToggleKey : @YES, OEGameCoreDisplayModeDisallowPrefSaveKey : @YES, }
+#define ManualOptionDefault(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @YES, OEGameCoreDisplayModeManualOnlyKey : @YES }
+#define ManualOption(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeManualOnlyKey : @YES }
 #define Label(_NAME_) @{ OEGameCoreDisplayModeLabelKey : _NAME_, }
 #define SeparatorItem() @{ OEGameCoreDisplayModeSeparatorItemKey : @"",}
 #define Submenu(_NAME_, ...) @{ OEGameCoreDisplayModeGroupNameKey: _NAME_, OEGameCoreDisplayModeGroupItemsKey: __VA_ARGS__}
@@ -533,13 +535,13 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 			Option(@"Horizontal", @"screen"),
 			SeparatorItem(),
 			Label(@"Ordering"),
-			OptionDefault(@"Main First", @"dualOrder"),
-			Option(@"Touch First", @"dualOrder"),
+			ManualOptionDefault(@"Main First", @"dualOrder"),
+			ManualOption(@"Touch First", @"dualOrder"),
 			SeparatorItem(),
 			Label(@"Separation"),
-			OptionDefault(@"None", @"gap"),
-			Option(@"50%", @"gap"),
-			Option(@"100%", @"gap"),
+			ManualOptionDefault(@"None", @"gap"),
+			ManualOption(@"50%", @"gap"),
+			ManualOption(@"100%", @"gap"),
 		  ]),
 		  Option(@"Main", @"screen"),
 		  Option(@"Touch", @"screen"),
