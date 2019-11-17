@@ -140,7 +140,7 @@ volatile bool execute = true;
 	free(displayBuffer);
 }
 
-- (void)setDisplayMode:(NSInteger)theMode
+- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient
 {
 	OSSpinLockLock(&spinlockDisplayMode);
 	
@@ -159,9 +159,14 @@ volatile bool execute = true;
 			break;
 			
 		case DS_DISPLAY_TYPE_DUAL:
-			displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
 			topScreenPosition = OEIntPointMake(0, 0);
-			btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
+			if (theOrient == DS_DISPLAY_ORIENTATION_VERTICAL) {
+				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
+				btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
+			} else {
+				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_HEIGHT);
+				btmScreenPosition = OEIntPointMake(GPU_DISPLAY_WIDTH, 0);
+			}
 			break;
 			
 		default:
@@ -267,7 +272,7 @@ volatile bool execute = true;
 
 - (OEIntSize)bufferSize
 {
-	return OEIntSizeMake(GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
+	return OEIntSizeMake(GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_HEIGHT * 2);
 }
 
 - (const void *)getVideoBufferWithHint:(void *)hint
@@ -452,7 +457,10 @@ volatile bool execute = true;
 		NSArray <NSDictionary <NSString *, id> *> *availableModesWithDefault =
 		@[
 		  Label(@"Screen"),
-		  OptionDefault(@"Dual", @"screen"),
+		  Submenu(@"Dual", @[
+			OptionDefault(@"Vertical", @"screen"),
+			Option(@"Horizontal", @"screen"),
+		  ]),
 		  Option(@"Main", @"screen"),
 		  Option(@"Touch", @"screen"),
 		  ];
@@ -531,19 +539,23 @@ volatile bool execute = true;
 
 - (void)loadDisplayModeOptions
 {
-	// Restore screen
-	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Dual";
+	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Vertical";
 	
 	NSInteger dispMode = DS_DISPLAY_TYPE_DUAL;
+	NSInteger orient = DS_DISPLAY_ORIENTATION_VERTICAL;
 	
-	if ([screenStr isEqualToString:@"Dual"]) {
+	if ([screenStr isEqualToString:@"Vertical"]) {
 		dispMode = DS_DISPLAY_TYPE_DUAL;
+		orient = DS_DISPLAY_ORIENTATION_VERTICAL;
+	} else if ([screenStr isEqualToString:@"Horizontal"]) {
+		dispMode = DS_DISPLAY_TYPE_DUAL;
+		orient = DS_DISPLAY_ORIENTATION_HORIZONTAL;
 	} else if ([screenStr isEqualToString:@"Main"])
 		dispMode = DS_DISPLAY_TYPE_MAIN;
 	else if ([screenStr isEqualToString:@"Touch"])
 		dispMode = DS_DISPLAY_TYPE_TOUCH;
 	
-	[self setDisplayMode:dispMode];
+	[self setDisplayType:dispMode orientation:orient];
 }
 
 #pragma mark Miscellaneous
