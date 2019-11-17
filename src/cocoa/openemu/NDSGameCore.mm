@@ -37,6 +37,7 @@
 #define OptionToggleableNoSave(_NAME_, _PREFKEY_) @{ OEGameCoreDisplayModeNameKey : _NAME_, OEGameCoreDisplayModePrefKeyNameKey : _PREFKEY_, OEGameCoreDisplayModeStateKey : @NO, OEGameCoreDisplayModeAllowsToggleKey : @YES, OEGameCoreDisplayModeDisallowPrefSaveKey : @YES, }
 #define Label(_NAME_) @{ OEGameCoreDisplayModeLabelKey : _NAME_, }
 #define SeparatorItem() @{ OEGameCoreDisplayModeSeparatorItemKey : @"",}
+#define Submenu(_NAME_, ...) @{ OEGameCoreDisplayModeGroupNameKey: _NAME_, OEGameCoreDisplayModeGroupItemsKey: __VA_ARGS__}
 
 volatile bool execute = true;
 
@@ -46,7 +47,6 @@ volatile bool execute = true;
 @synthesize cdsGPU;
 @synthesize cdsFirmware;
 @synthesize cdsCheats;
-@dynamic displayMode;
 
 - (id)init
 {
@@ -122,9 +122,11 @@ volatile bool execute = true;
 	SPU_SetVolume(100);
 	
 	// Set up the DS display
-	displayMode = DS_DISPLAY_TYPE_DUAL;
+	topScreenPosition = OEIntPointMake(0, 0);
+	btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 	displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
-	displayAspectRatio = OEIntSizeMake(2, 3);
+	OEIntSize size = self.bufferSize;
+	displayBuffer = (uint16_t *)malloc((size.width * size.height) * sizeof(uint16_t));
 	
 	return self;
 }
@@ -135,37 +137,31 @@ volatile bool execute = true;
 	NDS_DeInit();
 
 	pthread_rwlock_destroy(&rwlockCoreExecute);
+	free(displayBuffer);
 }
 
-- (NSInteger) displayMode
+- (void)setDisplayMode:(NSInteger)theMode
 {
 	OSSpinLockLock(&spinlockDisplayMode);
-	NSInteger theMode = displayMode;
-	OSSpinLockUnlock(&spinlockDisplayMode);
-	
-	return theMode;
-}
-
-- (void) setDisplayMode:(NSInteger)theMode
-{
-	OEIntRect newDisplayRect;
-	OEIntSize newDisplayAspectRatio;
 	
 	switch (theMode)
 	{
 		case DS_DISPLAY_TYPE_MAIN:
-			newDisplayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
-			newDisplayAspectRatio = OEIntSizeMake(4, 3);
+			displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
+			topScreenPosition = OEIntPointMake(0, 0);
+			btmScreenPosition = OEIntPointMake(-1, -1);
 			break;
 			
 		case DS_DISPLAY_TYPE_TOUCH:
-			newDisplayRect = OEIntRectMake(0, GPU_DISPLAY_HEIGHT, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
-			newDisplayAspectRatio = OEIntSizeMake(4, 3);
+			displayRect = OEIntRectMake(0, GPU_DISPLAY_HEIGHT, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
+			topScreenPosition = OEIntPointMake(-1, -1);
+			btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 			break;
 			
 		case DS_DISPLAY_TYPE_DUAL:
-			newDisplayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
-			newDisplayAspectRatio = OEIntSizeMake(2, 3);
+			displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
+			topScreenPosition = OEIntPointMake(0, 0);
+			btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 			break;
 			
 		default:
@@ -173,10 +169,6 @@ volatile bool execute = true;
 			break;
 	}
 	
-	OSSpinLockLock(&spinlockDisplayMode);
-	displayMode = theMode;
-	displayRect = newDisplayRect;
-	displayAspectRatio = newDisplayAspectRatio;
 	OSSpinLockUnlock(&spinlockDisplayMode);
 }
 
@@ -204,6 +196,8 @@ volatile bool execute = true;
 	pthread_rwlock_unlock(&rwlockCoreExecute);
 	
 	SPU_Emulate_user();
+
+	[self _blitScreensToBuffer];
 }
 
 - (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
@@ -234,8 +228,14 @@ volatile bool execute = true;
 
 	// Only temporary, so core doesn't crash on an older OpenEmu version
 	if ([self respondsToSelector:@selector(displayModeInfo)]) {
-		[self loadDisplayModeOptions];
+		_currentDisplayModeInfo = [self.displayModeInfo mutableCopy];
+		[_currentDisplayModeInfo enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSString * _Nonnull obj, BOOL * _Nonnull stop) {
+			[self _updateMenuForDisplayMode:obj];
+		}];
+	} else {
+		_currentDisplayModeInfo = [NSMutableDictionary dictionary];
 	}
+	[self loadDisplayModeOptions];
 	
 	return isRomLoaded;
 }
@@ -259,7 +259,7 @@ volatile bool execute = true;
 - (OEIntSize)aspectSize
 {
 	OSSpinLockLock(&spinlockDisplayMode);
-	OEIntSize theAspectRatio = displayAspectRatio;
+	OEIntSize theAspectRatio = displayRect.size;
 	OSSpinLockUnlock(&spinlockDisplayMode);
 	
 	return theAspectRatio;
@@ -275,7 +275,8 @@ volatile bool execute = true;
 	// TODO
 	//_gpuFrame.buffer = (uint16_t *)hint;
 	//return hint;
-	return GPU_screen;
+	//return GPU_screen;
+	return displayBuffer;
 }
 
 - (GLenum)pixelFormat
@@ -296,6 +297,32 @@ volatile bool execute = true;
 - (NSTimeInterval)frameInterval
 {
 	return DS_FRAMES_PER_SECOND;
+}
+
+- (void)_blitScreensToBuffer
+{
+	OSSpinLockLock(&spinlockDisplayMode);
+	OEIntPoint topScrPos = topScreenPosition;
+	OEIntPoint btmScrPos = btmScreenPosition;
+	OSSpinLockUnlock(&spinlockDisplayMode);
+	
+	if (topScrPos.x >= 0)
+		[self _blitScreenAtPoint:OEIntPointMake(0, 0) toBufferAtPoint:topScrPos];
+	if (btmScrPos.x >= 0)
+		[self _blitScreenAtPoint:OEIntPointMake(0, GPU_DISPLAY_HEIGHT) toBufferAtPoint:btmScrPos];
+}
+
+- (void)_blitScreenAtPoint:(OEIntPoint)p toBufferAtPoint:(OEIntPoint)q
+{
+	OEIntSize dstBufferSize = self.bufferSize;
+	uint16_t *origBuffer = (uint16_t *)GPU_screen;
+	for (int y = 0; y < GPU_DISPLAY_HEIGHT; y++) {
+		for (int x = 0; x < GPU_DISPLAY_WIDTH; x++) {
+			int srci = (y+p.y) * GPU_DISPLAY_WIDTH + (x+p.x);
+			int dsti = (y+q.y) * dstBufferSize.width + (x+q.x);
+			displayBuffer[dsti] = origBuffer[srci];
+		}
+	}
 }
 
 #pragma mark Audio
@@ -349,27 +376,16 @@ volatile bool execute = true;
 
 - (oneway void)didTouchScreenPoint:(OEIntPoint)aPoint
 {
-	BOOL isTouchPressed = NO;
-	NSInteger dispMode = [self displayMode];
+	BOOL isTouchPressed = YES;
+	OSSpinLockLock(&spinlockDisplayMode);
+	OEIntPoint btmScrPos = btmScreenPosition;
+	OSSpinLockUnlock(&spinlockDisplayMode);
 	
-	switch (dispMode)
-	{
-		case DS_DISPLAY_TYPE_MAIN:
-			isTouchPressed = NO; // Reject touch input if showing only the main screen.
-			break;
-			
-		case DS_DISPLAY_TYPE_TOUCH:
-			isTouchPressed = YES;
-			break;
-			
-		case DS_DISPLAY_TYPE_DUAL:
-			isTouchPressed = YES;
-			aPoint.y -= GPU_DISPLAY_HEIGHT; // Normalize the y-coordinate to the DS.
-			break;
-			
-		default:
-			return;
-			break;
+	if (btmScrPos.x < 0) {
+		isTouchPressed = NO; // Reject touch input if showing only the main screen.
+	} else {
+		aPoint.x -= btmScreenPosition.x;
+		aPoint.y -= btmScreenPosition.y;
 	}
 	
 	// Constrain the touch point to the DS dimensions.
@@ -450,50 +466,84 @@ volatile bool execute = true;
 
 - (void)changeDisplayWithMode:(NSString *)currentDisplayMode
 {
+	NSString *key = [self _updateMenuForDisplayMode:currentDisplayMode];
+
+	_currentDisplayModeInfo[key] = currentDisplayMode;
+	[self loadDisplayModeOptions];
+}
+
+- (NSString *)_updateMenuForDisplayMode:(NSString *)currentDisplayMode
+{
 	if (_availableDisplayModes.count == 0)
 		[self displayModes];
 
 	// First check if 'displayMode' is valid
-	BOOL isValidDisplayMode = NO;
-
-	for (NSDictionary *modeDict in _availableDisplayModes) {
+	NSString __block *key;
+	BOOL isValidDisplayMode = [self _enumerateDisplayModesOptionsWithBlock:^(NSDictionary *modeDict, BOOL *stop) {
 		if ([modeDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode]) {
-			isValidDisplayMode = YES;
-			break;
+			key = modeDict[OEGameCoreDisplayModePrefKeyNameKey];
+			*stop = YES;
 		}
-	}
+	}];
 
 	// Disallow a 'displayMode' not found in _availableDisplayModes
 	if (!isValidDisplayMode)
-		return;
+		return nil;
 
 	// Handle option state changes
-	for (NSMutableDictionary *optionDict in _availableDisplayModes) {
-		if (!optionDict[OEGameCoreDisplayModeNameKey])
-			continue;
+	[self _enumerateDisplayModesOptionsWithBlock:^(NSMutableDictionary *modeDict, BOOL *stop) {
 		// Mutually exclusive option state change
-		else if ([optionDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode])
-			optionDict[OEGameCoreDisplayModeStateKey] = @YES;
-		// Reset
-		else
-			optionDict[OEGameCoreDisplayModeStateKey] = @NO;
-	}
+		if ([modeDict[OEGameCoreDisplayModePrefKeyNameKey] isEqual:key]) {
+			if ([modeDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode])
+				modeDict[OEGameCoreDisplayModeStateKey] = @YES;
+			// Reset
+			else
+				modeDict[OEGameCoreDisplayModeStateKey] = @NO;
+		}
+	}];
+	
+	return key;
+}
 
-	if ([currentDisplayMode isEqualToString:@"Dual"])
-		[self setDisplayMode:DS_DISPLAY_TYPE_DUAL];
-	else if ([currentDisplayMode isEqualToString:@"Main"])
-		[self setDisplayMode:DS_DISPLAY_TYPE_MAIN];
-	else if ([currentDisplayMode isEqualToString:@"Touch"])
-		[self setDisplayMode:DS_DISPLAY_TYPE_TOUCH];
+- (BOOL)_enumerateDisplayModesOptionsWithBlock:(void (^)(NSMutableDictionary *modeDict, BOOL *stop))block
+{
+	NSMutableArray *queue = [@[_availableDisplayModes] mutableCopy];
+	
+	for (NSInteger i = 0; i < queue.count; i++) {
+		for (NSMutableDictionary *modeDict in queue[i]) {
+			NSString *name = modeDict[OEGameCoreDisplayModeNameKey];
+			NSString *grpName = modeDict[OEGameCoreDisplayModeGroupItemsKey];
+			
+			if (name) {
+				BOOL stop = NO;
+				block(modeDict, &stop);
+				if (stop)
+					return YES;
+			} else if (grpName) {
+				NSArray *next = modeDict[OEGameCoreDisplayModeGroupItemsKey];
+				[queue addObject:next];
+			}
+		}
+	}
+	
+	return NO;
 }
 
 - (void)loadDisplayModeOptions
 {
 	// Restore screen
-	NSString *lastScreen = self.displayModeInfo[@"screen"];
-	if (lastScreen && ![lastScreen isEqualToString:@"Dual"]) {
-		[self changeDisplayWithMode:lastScreen];
-	}
+	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Dual";
+	
+	NSInteger dispMode = DS_DISPLAY_TYPE_DUAL;
+	
+	if ([screenStr isEqualToString:@"Dual"]) {
+		dispMode = DS_DISPLAY_TYPE_DUAL;
+	} else if ([screenStr isEqualToString:@"Main"])
+		dispMode = DS_DISPLAY_TYPE_MAIN;
+	else if ([screenStr isEqualToString:@"Touch"])
+		dispMode = DS_DISPLAY_TYPE_TOUCH;
+	
+	[self setDisplayMode:dispMode];
 }
 
 #pragma mark Miscellaneous

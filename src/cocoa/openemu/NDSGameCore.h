@@ -33,14 +33,20 @@
 	NSPoint touchLocation;
 	NSMutableDictionary *addedCheatsDict;
 	NSMutableArray <NSMutableDictionary <NSString *, id> *> *_availableDisplayModes;
+	
 	CocoaDSCheatManager *cdsCheats;
 	CocoaDSController *cdsController;
 	CocoaDSGPU *cdsGPU;
 	CocoaDSFirmware *cdsFirmware;
-	NSInteger displayMode;
+	
+	NSMutableDictionary <NSString *, NSString *> *_currentDisplayModeInfo;
+	OEIntPoint topScreenPosition;
+	OEIntPoint btmScreenPosition;
 	OEIntRect displayRect;
-	OEIntSize displayAspectRatio;
+	
 	NSInteger inputID[OENDSButtonCount]; // Key = OpenEmu's input ID, Value = DeSmuME's input ID
+	
+	uint16_t *displayBuffer;
 	
 	OSSpinLock spinlockDisplayMode;
 	pthread_rwlock_t rwlockCoreExecute;
@@ -50,6 +56,5 @@
 @property (strong) CocoaDSController *cdsController;
 @property (strong) CocoaDSGPU *cdsGPU;
 @property (strong) CocoaDSFirmware *cdsFirmware;
-@property (assign) NSInteger displayMode;
 
 @end
