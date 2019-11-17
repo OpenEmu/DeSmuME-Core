@@ -42,6 +42,7 @@
 	NSMutableDictionary <NSString *, NSString *> *_currentDisplayModeInfo;
 	OEIntPoint topScreenPosition;
 	OEIntPoint btmScreenPosition;
+	int displayRotation;
 	OEIntRect displayRect;
 	
 	NSInteger inputID[OENDSButtonCount]; // Key = OpenEmu's input ID, Value = DeSmuME's input ID

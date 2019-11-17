@@ -39,7 +39,23 @@
 #define SeparatorItem() @{ OEGameCoreDisplayModeSeparatorItemKey : @"",}
 #define Submenu(_NAME_, ...) @{ OEGameCoreDisplayModeGroupNameKey: _NAME_, OEGameCoreDisplayModeGroupItemsKey: __VA_ARGS__}
 
+#define WRAP(a, b) ((((a) % (b)) + (b)) % (b))
+
 volatile bool execute = true;
+
+
+static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
+{
+	int rotMtxes[4][4] = {
+		{1, 0, 0, 1},
+		{0, -1, 1, 0},
+		{-1, 0, 0, -1},
+		{0, 1, -1, 0}
+	};
+	int *thisMatx = rotMtxes[WRAP(deg, 360) / 90];
+	return OEIntPointMake(p.x * thisMatx[0] + p.y * thisMatx[2], p.x * thisMatx[1] + p.y * thisMatx[3]);
+}
+
 
 @implementation NDSGameCore
 
@@ -123,6 +139,7 @@ volatile bool execute = true;
 	
 	// Set up the DS display
 	topScreenPosition = OEIntPointMake(0, 0);
+	displayRotation = 0;
 	btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 	displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
 	OEIntSize size = self.bufferSize;
@@ -140,21 +157,23 @@ volatile bool execute = true;
 	free(displayBuffer);
 }
 
-- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering
+- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering rotation:(int)rot
 {
+	OEIntSize bufSize = self.bufferSize;
 	OSSpinLockLock(&spinlockDisplayMode);
+	BOOL disableTop = NO, disableBtm = NO;
 	
 	switch (theMode)
 	{
 		case DS_DISPLAY_TYPE_MAIN:
+			disableBtm = YES;
 			displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
 			topScreenPosition = OEIntPointMake(0, 0);
-			btmScreenPosition = OEIntPointMake(-1, -1);
 			break;
 			
 		case DS_DISPLAY_TYPE_TOUCH:
+			disableTop = YES;
 			displayRect = OEIntRectMake(0, GPU_DISPLAY_HEIGHT, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT);
-			topScreenPosition = OEIntPointMake(-1, -1);
 			btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 			break;
 			
@@ -175,6 +194,35 @@ volatile bool execute = true;
 			return;
 			break;
 	}
+	
+	displayRotation = rot;
+	topScreenPosition = _NDSRotatePointAroundOrigin(topScreenPosition, rot);
+	btmScreenPosition = _NDSRotatePointAroundOrigin(btmScreenPosition, rot);
+	OEIntPoint dispRectP1 = _NDSRotatePointAroundOrigin(displayRect.origin, rot);
+	OEIntPoint dispRectP2 = _NDSRotatePointAroundOrigin(OEIntPointMake(OEIntRectMaxX(displayRect), OEIntRectMaxY(displayRect)), rot);
+	
+	if (rot == 90 || rot == 180) {
+		topScreenPosition.y += bufSize.height-1;
+		btmScreenPosition.y += bufSize.height-1;
+		dispRectP1.y += bufSize.height;
+		dispRectP2.y += bufSize.height;
+	}
+	if (rot == 270 || rot == 180) {
+		topScreenPosition.x += bufSize.width-1;
+		btmScreenPosition.x += bufSize.width-1;
+		dispRectP1.x += bufSize.width;
+		dispRectP2.x += bufSize.width;
+	}
+	
+	displayRect.origin.x = MIN(dispRectP1.x, dispRectP2.x);
+	displayRect.origin.y = MIN(dispRectP1.y, dispRectP2.y);
+	displayRect.size.width = MAX(dispRectP1.x, dispRectP2.x) - displayRect.origin.x;
+	displayRect.size.height = MAX(dispRectP1.y, dispRectP2.y) - displayRect.origin.y;
+	
+	if (disableTop)
+		topScreenPosition.x = -1;
+	if (disableBtm)
+		btmScreenPosition.x = -1;
 	
 	OSSpinLockUnlock(&spinlockDisplayMode);
 }
@@ -274,7 +322,7 @@ volatile bool execute = true;
 
 - (OEIntSize)bufferSize
 {
-	return OEIntSizeMake(GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_HEIGHT * 2);
+	return OEIntSizeMake(GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_WIDTH * 2);
 }
 
 - (const void *)getVideoBufferWithHint:(void *)hint
@@ -311,23 +359,32 @@ volatile bool execute = true;
 	OSSpinLockLock(&spinlockDisplayMode);
 	OEIntPoint topScrPos = topScreenPosition;
 	OEIntPoint btmScrPos = btmScreenPosition;
+	int angle = displayRotation;
 	OSSpinLockUnlock(&spinlockDisplayMode);
 	
 	if (topScrPos.x >= 0)
-		[self _blitScreenAtPoint:OEIntPointMake(0, 0) toBufferAtPoint:topScrPos];
+		[self _blitScreenAtPoint:OEIntPointMake(0, 0) rotation:angle toBufferAtPoint:topScrPos];
 	if (btmScrPos.x >= 0)
-		[self _blitScreenAtPoint:OEIntPointMake(0, GPU_DISPLAY_HEIGHT) toBufferAtPoint:btmScrPos];
+		[self _blitScreenAtPoint:OEIntPointMake(0, GPU_DISPLAY_HEIGHT) rotation:angle toBufferAtPoint:btmScrPos];
 }
 
-- (void)_blitScreenAtPoint:(OEIntPoint)p toBufferAtPoint:(OEIntPoint)q
+- (void)_blitScreenAtPoint:(OEIntPoint)p rotation:(int)angle toBufferAtPoint:(OEIntPoint)q
 {
 	OEIntSize dstBufferSize = self.bufferSize;
 	uint16_t *origBuffer = (uint16_t *)GPU_screen;
+	
+	const int rowDelta[4] = {1, -dstBufferSize.width, -1, dstBufferSize.width};
+	const int colDelta[4] = {dstBufferSize.width, 1, -dstBufferSize.width, -1};
+	int dstdx = rowDelta[WRAP(angle, 360) / 90];
+	int dstdy = colDelta[WRAP(angle, 360) / 90];
+	
 	for (int y = 0; y < GPU_DISPLAY_HEIGHT; y++) {
+		int srci = (y+p.y) * GPU_DISPLAY_WIDTH + p.x;
+		int dsti = q.y * dstBufferSize.width + q.x + dstdy * y;
 		for (int x = 0; x < GPU_DISPLAY_WIDTH; x++) {
-			int srci = (y+p.y) * GPU_DISPLAY_WIDTH + (x+p.x);
-			int dsti = (y+q.y) * dstBufferSize.width + (x+q.x);
 			displayBuffer[dsti] = origBuffer[srci];
+			srci += 1;
+			dsti += dstdx;
 		}
 	}
 }
@@ -383,16 +440,19 @@ volatile bool execute = true;
 
 - (oneway void)didTouchScreenPoint:(OEIntPoint)aPoint
 {
-	BOOL isTouchPressed = YES;
 	OSSpinLockLock(&spinlockDisplayMode);
 	OEIntPoint btmScrPos = btmScreenPosition;
+	OEIntRect dispRect = displayRect;
+	int angle = displayRotation;
 	OSSpinLockUnlock(&spinlockDisplayMode);
 	
-	if (btmScrPos.x < 0) {
-		isTouchPressed = NO; // Reject touch input if showing only the main screen.
-	} else {
-		aPoint.x -= btmScreenPosition.x;
-		aPoint.y -= btmScreenPosition.y;
+	// Reject touch input if showing only the main screen.
+	BOOL isTouchPressed = NO;
+	if (btmScrPos.x >= 0) {
+		isTouchPressed = YES;
+		aPoint.x = aPoint.x + dispRect.origin.x - btmScrPos.x;
+		aPoint.y = aPoint.y + dispRect.origin.y - btmScrPos.y;
+		aPoint = _NDSRotatePointAroundOrigin(aPoint, -angle);
 	}
 	
 	// Constrain the touch point to the DS dimensions.
@@ -469,6 +529,12 @@ volatile bool execute = true;
 		  ]),
 		  Option(@"Main", @"screen"),
 		  Option(@"Touch", @"screen"),
+		  SeparatorItem(),
+		  Label(@"Rotation"),
+		  OptionDefault(@"0°", @"rotation"),
+		  Option(@"90°", @"rotation"),
+		  Option(@"180°", @"rotation"),
+		  Option(@"270°", @"rotation"),
 		  ];
 
 		// Deep mutable copy
@@ -547,10 +613,12 @@ volatile bool execute = true;
 {
 	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Vertical";
 	NSString *orderStr = _currentDisplayModeInfo[@"dualOrder"] ?: @"Main First";
+	NSString *rotationStr = _currentDisplayModeInfo[@"rotation"] ?: @"0°";
 	
 	NSInteger dispMode = DS_DISPLAY_TYPE_DUAL;
 	NSInteger orient = DS_DISPLAY_ORIENTATION_VERTICAL;
 	NSInteger order = DS_DISPLAY_ORDER_MAIN_FIRST;
+	double rotation = 0;
 	
 	if ([screenStr isEqualToString:@"Vertical"]) {
 		dispMode = DS_DISPLAY_TYPE_DUAL;
@@ -568,7 +636,16 @@ volatile bool execute = true;
 	else if ([orderStr isEqualToString:@"Touch First"])
 		order = DS_DISPLAY_ORDER_TOUCH_FIRST;
 	
-	[self setDisplayType:dispMode orientation:orient ordering:order];
+	if ([rotationStr isEqualToString:@"0°"])
+		rotation = 0;
+	else if ([rotationStr isEqualToString:@"90°"])
+		rotation = 90;
+	else if ([rotationStr isEqualToString:@"180°"])
+		rotation = 180;
+	else if ([rotationStr isEqualToString:@"270°"])
+		rotation = 270;
+	
+	[self setDisplayType:dispMode orientation:orient ordering:order rotation:rotation];
 }
 
 #pragma mark Miscellaneous
