@@ -142,8 +142,6 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	displayRotation = 0;
 	btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
 	displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
-	OEIntSize size = self.bufferSize;
-	displayBuffer = (uint16_t *)malloc((size.width * size.height) * sizeof(uint16_t));
 	
 	return self;
 }
@@ -154,7 +152,8 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	NDS_DeInit();
 
 	pthread_rwlock_destroy(&rwlockCoreExecute);
-	free(displayBuffer);
+	if (ownsBuffer)
+		free(displayBuffer);
 }
 
 - (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering rotation:(NSInteger)rot gap:(NSInteger)gap
@@ -331,10 +330,14 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 
 - (const void *)getVideoBufferWithHint:(void *)hint
 {
-	// TODO
-	//_gpuFrame.buffer = (uint16_t *)hint;
-	//return hint;
-	//return GPU_screen;
+	if (!hint && !displayBuffer) {
+		OEIntSize size = self.bufferSize;
+		displayBuffer = (uint16_t *)malloc((size.width * size.height) * sizeof(uint16_t));
+		ownsBuffer = YES;
+	} else if (hint) {
+		displayBuffer = (uint16_t *)hint;
+		ownsBuffer = NO;
+	}
 	return displayBuffer;
 }
 

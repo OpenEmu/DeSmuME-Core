@@ -48,6 +48,7 @@
 	NSInteger inputID[OENDSButtonCount]; // Key = OpenEmu's input ID, Value = DeSmuME's input ID
 	
 	uint16_t *displayBuffer;
+	BOOL ownsBuffer;
 	
 	OSSpinLock spinlockDisplayMode;
 	pthread_rwlock_t rwlockCoreExecute;
