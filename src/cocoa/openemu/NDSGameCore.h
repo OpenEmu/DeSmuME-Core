@@ -32,7 +32,7 @@
 {
 	NSPoint touchLocation;
 	NSMutableDictionary *addedCheatsDict;
-    NSMutableArray <NSMutableDictionary <NSString *, id> *> *_availableDisplayModes;
+	NSMutableArray <NSMutableDictionary <NSString *, id> *> *_availableDisplayModes;
 	CocoaDSCheatManager *cdsCheats;
 	CocoaDSController *cdsController;
 	CocoaDSGPU *cdsGPU;

@@ -120,7 +120,7 @@ volatile bool execute = true;
 	
 	SPU_SetSynchMode(CommonSettings.SPU_sync_mode, CommonSettings.SPU_sync_method);
 	SPU_SetVolume(100);
-    
+	
 	// Set up the DS display
 	displayMode = DS_DISPLAY_TYPE_DUAL;
 	displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
@@ -232,10 +232,10 @@ volatile bool execute = true;
 	
 	[CocoaDSCheatManager setMasterCheatList:cdsCheats];
 
-    // Only temporary, so core doesn't crash on an older OpenEmu version
-    if ([self respondsToSelector:@selector(displayModeInfo)]) {
-        [self loadDisplayModeOptions];
-    }
+	// Only temporary, so core doesn't crash on an older OpenEmu version
+	if ([self respondsToSelector:@selector(displayModeInfo)]) {
+		[self loadDisplayModeOptions];
+	}
 	
 	return isRomLoaded;
 }
@@ -272,9 +272,9 @@ volatile bool execute = true;
 
 - (const void *)getVideoBufferWithHint:(void *)hint
 {
-    // TODO
-    //_gpuFrame.buffer = (uint16_t *)hint;
-    //return hint;
+	// TODO
+	//_gpuFrame.buffer = (uint16_t *)hint;
+	//return hint;
 	return GPU_screen;
 }
 
@@ -290,7 +290,7 @@ volatile bool execute = true;
 
 - (GLenum)internalPixelFormat
 {
-    return GL_RGB5_A1;
+	return GL_RGB5_A1;
 }
 
 - (NSTimeInterval)frameInterval
@@ -317,7 +317,7 @@ volatile bool execute = true;
 
 - (NSUInteger)audioBitDepth
 {
-    return SPU_SAMPLE_RESOLUTION;
+	return SPU_SAMPLE_RESOLUTION;
 }
 
 - (NSUInteger)channelCountForBuffer:(NSUInteger)buffer
@@ -415,85 +415,85 @@ volatile bool execute = true;
 
 - (void)saveStateToFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-    // TODO: error handling
-    block([CocoaDSFile saveState:[NSURL fileURLWithPath:fileName]], nil);
+	// TODO: error handling
+	block([CocoaDSFile saveState:[NSURL fileURLWithPath:fileName]], nil);
 }
 
 - (void)loadStateFromFileAtPath:(NSString *)fileName completionHandler:(void (^)(BOOL, NSError *))block
 {
-    // TODO: error handling
-    block([CocoaDSFile loadState:[NSURL fileURLWithPath:fileName]], nil);
+	// TODO: error handling
+	block([CocoaDSFile loadState:[NSURL fileURLWithPath:fileName]], nil);
 }
 
 #pragma mark - Display Mode
 
 - (NSArray <NSDictionary <NSString *, id> *> *)displayModes
 {
-    if (_availableDisplayModes.count == 0)
-    {
-        _availableDisplayModes = [NSMutableArray array];
+	if (_availableDisplayModes.count == 0)
+	{
+		_availableDisplayModes = [NSMutableArray array];
 
-        NSArray <NSDictionary <NSString *, id> *> *availableModesWithDefault =
-        @[
-          Label(@"Screen"),
-          OptionDefault(@"Dual", @"screen"),
-          Option(@"Main", @"screen"),
-          Option(@"Touch", @"screen"),
-          ];
+		NSArray <NSDictionary <NSString *, id> *> *availableModesWithDefault =
+		@[
+		  Label(@"Screen"),
+		  OptionDefault(@"Dual", @"screen"),
+		  Option(@"Main", @"screen"),
+		  Option(@"Touch", @"screen"),
+		  ];
 
-        // Deep mutable copy
-        _availableDisplayModes = (NSMutableArray *)CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFArrayRef)availableModesWithDefault, kCFPropertyListMutableContainers));
-    }
+		// Deep mutable copy
+		_availableDisplayModes = (NSMutableArray *)CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFArrayRef)availableModesWithDefault, kCFPropertyListMutableContainers));
+	}
 
-    return [_availableDisplayModes copy];
+	return [_availableDisplayModes copy];
 }
 
 - (void)changeDisplayWithMode:(NSString *)currentDisplayMode
 {
-    if (_availableDisplayModes.count == 0)
-        [self displayModes];
+	if (_availableDisplayModes.count == 0)
+		[self displayModes];
 
-    // First check if 'displayMode' is valid
-    BOOL isValidDisplayMode = NO;
+	// First check if 'displayMode' is valid
+	BOOL isValidDisplayMode = NO;
 
-    for (NSDictionary *modeDict in _availableDisplayModes) {
-        if ([modeDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode]) {
-            isValidDisplayMode = YES;
-            break;
-        }
-    }
+	for (NSDictionary *modeDict in _availableDisplayModes) {
+		if ([modeDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode]) {
+			isValidDisplayMode = YES;
+			break;
+		}
+	}
 
-    // Disallow a 'displayMode' not found in _availableDisplayModes
-    if (!isValidDisplayMode)
-        return;
+	// Disallow a 'displayMode' not found in _availableDisplayModes
+	if (!isValidDisplayMode)
+		return;
 
-    // Handle option state changes
-    for (NSMutableDictionary *optionDict in _availableDisplayModes) {
-        if (!optionDict[OEGameCoreDisplayModeNameKey])
-            continue;
-        // Mutually exclusive option state change
-        else if ([optionDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode])
-            optionDict[OEGameCoreDisplayModeStateKey] = @YES;
-        // Reset
-        else
-            optionDict[OEGameCoreDisplayModeStateKey] = @NO;
-    }
+	// Handle option state changes
+	for (NSMutableDictionary *optionDict in _availableDisplayModes) {
+		if (!optionDict[OEGameCoreDisplayModeNameKey])
+			continue;
+		// Mutually exclusive option state change
+		else if ([optionDict[OEGameCoreDisplayModeNameKey] isEqualToString:currentDisplayMode])
+			optionDict[OEGameCoreDisplayModeStateKey] = @YES;
+		// Reset
+		else
+			optionDict[OEGameCoreDisplayModeStateKey] = @NO;
+	}
 
-    if ([currentDisplayMode isEqualToString:@"Dual"])
-        [self setDisplayMode:DS_DISPLAY_TYPE_DUAL];
-    else if ([currentDisplayMode isEqualToString:@"Main"])
-        [self setDisplayMode:DS_DISPLAY_TYPE_MAIN];
-    else if ([currentDisplayMode isEqualToString:@"Touch"])
-        [self setDisplayMode:DS_DISPLAY_TYPE_TOUCH];
+	if ([currentDisplayMode isEqualToString:@"Dual"])
+		[self setDisplayMode:DS_DISPLAY_TYPE_DUAL];
+	else if ([currentDisplayMode isEqualToString:@"Main"])
+		[self setDisplayMode:DS_DISPLAY_TYPE_MAIN];
+	else if ([currentDisplayMode isEqualToString:@"Touch"])
+		[self setDisplayMode:DS_DISPLAY_TYPE_TOUCH];
 }
 
 - (void)loadDisplayModeOptions
 {
-    // Restore screen
-    NSString *lastScreen = self.displayModeInfo[@"screen"];
-    if (lastScreen && ![lastScreen isEqualToString:@"Dual"]) {
-        [self changeDisplayWithMode:lastScreen];
-    }
+	// Restore screen
+	NSString *lastScreen = self.displayModeInfo[@"screen"];
+	if (lastScreen && ![lastScreen isEqualToString:@"Dual"]) {
+		[self changeDisplayWithMode:lastScreen];
+	}
 }
 
 #pragma mark Miscellaneous

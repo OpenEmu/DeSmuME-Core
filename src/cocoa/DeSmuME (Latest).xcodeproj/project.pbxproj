@@ -1002,7 +1002,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		057577C7236A6B6900254B6A /* coreaudiosound_null.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = coreaudiosound_null.cpp; sourceTree = "<group>"; };
+		057577C7236A6B6900254B6A /* coreaudiosound_null.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = coreaudiosound_null.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -1668,8 +1668,11 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				AB407F381A620D6E00313213 /* OptimizationProfiles */,
 			);
+			indentWidth = 4;
 			name = DeSmuME;
 			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 1;
 		};
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
