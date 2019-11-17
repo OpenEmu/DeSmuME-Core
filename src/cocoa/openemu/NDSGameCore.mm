@@ -157,7 +157,7 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	free(displayBuffer);
 }
 
-- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering rotation:(int)rot
+- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering rotation:(NSInteger)rot gap:(NSInteger)gap
 {
 	OEIntSize bufSize = self.bufferSize;
 	OSSpinLockLock(&spinlockDisplayMode);
@@ -180,11 +180,11 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 		case DS_DISPLAY_TYPE_DUAL:
 			topScreenPosition = OEIntPointMake(0, 0);
 			if (theOrient == DS_DISPLAY_ORIENTATION_VERTICAL) {
-				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2);
-				btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT);
+				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH, GPU_DISPLAY_HEIGHT * 2 + gap);
+				btmScreenPosition = OEIntPointMake(0, GPU_DISPLAY_HEIGHT + gap);
 			} else {
-				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_HEIGHT);
-				btmScreenPosition = OEIntPointMake(GPU_DISPLAY_WIDTH, 0);
+				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH * 2 + gap, GPU_DISPLAY_HEIGHT);
+				btmScreenPosition = OEIntPointMake(GPU_DISPLAY_WIDTH + gap, 0);
 			}
 			if (theOrdering == DS_DISPLAY_ORDER_TOUCH_FIRST)
 				std::swap(topScreenPosition, btmScreenPosition);
@@ -322,7 +322,11 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 
 - (OEIntSize)bufferSize
 {
-	return OEIntSizeMake(GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_WIDTH * 2);
+	const OEIntSize bufSize = {
+		(int)((GPU_DISPLAY_WIDTH * 2 + DS_DISPLAY_GAP) + 1) & (~2),
+		(int)((GPU_DISPLAY_WIDTH * 2 + DS_DISPLAY_GAP) + 1) & (~2)
+	};
+	return bufSize;
 }
 
 - (const void *)getVideoBufferWithHint:(void *)hint
@@ -362,6 +366,8 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	int angle = displayRotation;
 	OSSpinLockUnlock(&spinlockDisplayMode);
 	
+	OEIntSize bufsize = self.bufferSize;
+	memset(displayBuffer, 0, bufsize.width * bufsize.height * sizeof(uint16_t));
 	if (topScrPos.x >= 0)
 		[self _blitScreenAtPoint:OEIntPointMake(0, 0) rotation:angle toBufferAtPoint:topScrPos];
 	if (btmScrPos.x >= 0)
@@ -526,6 +532,11 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 			Label(@"Ordering"),
 			OptionDefault(@"Main First", @"dualOrder"),
 			Option(@"Touch First", @"dualOrder"),
+			SeparatorItem(),
+			Label(@"Separation"),
+			OptionDefault(@"None", @"gap"),
+			Option(@"50%", @"gap"),
+			Option(@"100%", @"gap"),
 		  ]),
 		  Option(@"Main", @"screen"),
 		  Option(@"Touch", @"screen"),
@@ -614,10 +625,12 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Vertical";
 	NSString *orderStr = _currentDisplayModeInfo[@"dualOrder"] ?: @"Main First";
 	NSString *rotationStr = _currentDisplayModeInfo[@"rotation"] ?: @"0°";
+	NSString *gapStr = _currentDisplayModeInfo[@"gap"] ?: @"None";
 	
 	NSInteger dispMode = DS_DISPLAY_TYPE_DUAL;
 	NSInteger orient = DS_DISPLAY_ORIENTATION_VERTICAL;
 	NSInteger order = DS_DISPLAY_ORDER_MAIN_FIRST;
+	NSInteger gap = 0;
 	double rotation = 0;
 	
 	if ([screenStr isEqualToString:@"Vertical"]) {
@@ -645,7 +658,14 @@ static OEIntPoint _NDSRotatePointAroundOrigin(OEIntPoint p, int deg)
 	else if ([rotationStr isEqualToString:@"270°"])
 		rotation = 270;
 	
-	[self setDisplayType:dispMode orientation:orient ordering:order rotation:rotation];
+	if ([gapStr isEqualToString:@"None"])
+		gap = 0;
+	else if ([gapStr isEqualToString:@"50%"])
+		gap = DS_DISPLAY_GAP / 2;
+	else if ([gapStr isEqualToString:@"100%"])
+		gap = DS_DISPLAY_GAP;
+	
+	[self setDisplayType:dispMode orientation:orient ordering:order rotation:rotation gap:gap];
 }
 
 #pragma mark Miscellaneous
