@@ -15,6 +15,7 @@
 	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <utility>
 #import "NDSGameCore.h"
 #import "cocoa_cheat.h"
 #import "cocoa_globals.h"
@@ -24,7 +25,6 @@
 #import "cocoa_input.h"
 #import "OESoundInterface.h"
 #import "OENDSSystemResponderClient.h"
-
 #include <OpenGL/gl.h>
 #include "../../NDSSystem.h"
 #include "../../GPU.h"
@@ -140,7 +140,7 @@ volatile bool execute = true;
 	free(displayBuffer);
 }
 
-- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient
+- (void)setDisplayType:(NSInteger)theMode orientation:(NSInteger)theOrient ordering:(NSInteger)theOrdering
 {
 	OSSpinLockLock(&spinlockDisplayMode);
 	
@@ -167,6 +167,8 @@ volatile bool execute = true;
 				displayRect = OEIntRectMake(0, 0, GPU_DISPLAY_WIDTH * 2, GPU_DISPLAY_HEIGHT);
 				btmScreenPosition = OEIntPointMake(GPU_DISPLAY_WIDTH, 0);
 			}
+			if (theOrdering == DS_DISPLAY_ORDER_TOUCH_FIRST)
+				std::swap(topScreenPosition, btmScreenPosition);
 			break;
 			
 		default:
@@ -460,6 +462,10 @@ volatile bool execute = true;
 		  Submenu(@"Dual", @[
 			OptionDefault(@"Vertical", @"screen"),
 			Option(@"Horizontal", @"screen"),
+			SeparatorItem(),
+			Label(@"Ordering"),
+			OptionDefault(@"Main First", @"dualOrder"),
+			Option(@"Touch First", @"dualOrder"),
 		  ]),
 		  Option(@"Main", @"screen"),
 		  Option(@"Touch", @"screen"),
@@ -540,9 +546,11 @@ volatile bool execute = true;
 - (void)loadDisplayModeOptions
 {
 	NSString *screenStr = _currentDisplayModeInfo[@"screen"] ?: @"Vertical";
+	NSString *orderStr = _currentDisplayModeInfo[@"dualOrder"] ?: @"Main First";
 	
 	NSInteger dispMode = DS_DISPLAY_TYPE_DUAL;
 	NSInteger orient = DS_DISPLAY_ORIENTATION_VERTICAL;
+	NSInteger order = DS_DISPLAY_ORDER_MAIN_FIRST;
 	
 	if ([screenStr isEqualToString:@"Vertical"]) {
 		dispMode = DS_DISPLAY_TYPE_DUAL;
@@ -555,7 +563,12 @@ volatile bool execute = true;
 	else if ([screenStr isEqualToString:@"Touch"])
 		dispMode = DS_DISPLAY_TYPE_TOUCH;
 	
-	[self setDisplayType:dispMode orientation:orient];
+	if ([orderStr isEqualToString:@"Main First"])
+		order = DS_DISPLAY_ORDER_MAIN_FIRST;
+	else if ([orderStr isEqualToString:@"Touch First"])
+		order = DS_DISPLAY_ORDER_TOUCH_FIRST;
+	
+	[self setDisplayType:dispMode orientation:orient ordering:order];
 }
 
 #pragma mark Miscellaneous
