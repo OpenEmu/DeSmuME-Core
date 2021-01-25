@@ -109,8 +109,6 @@ GPU3DInterface *core3DList[] = {
 {
 	NDS_3D_ChangeCore(CORE3DLIST_NULL);
 	DestroyOpenGLRenderer();
-	
-	[super dealloc];
 }
 
 - (void) setGpuStateFlags:(UInt32)flags

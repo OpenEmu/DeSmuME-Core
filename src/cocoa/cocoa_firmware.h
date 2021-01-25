@@ -46,7 +46,7 @@
 
 @property (assign) struct NDS_fw_config_data *data;
 @property (assign) NSInteger consoleType;
-@property (copy) NSString *nickname;
+@property (nonatomic, copy) NSString *nickname;
 @property (copy) NSString *message;
 @property (assign) NSInteger favoriteColor;
 @property (assign) NSDate *birthday;

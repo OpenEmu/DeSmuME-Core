@@ -36,9 +36,9 @@
 	NSMutableArray *xmlCharacterStack;
 }
 
-@property (readonly) NSMutableDictionary *header;
-@property (readonly) NSMutableDictionary *bindings;
-@property (readonly) NSURL *fileURL;
+@property (readonly, strong) NSMutableDictionary *header;
+@property (readonly, strong) NSMutableDictionary *bindings;
+@property (readonly, strong) NSURL *fileURL;
 @property (assign) BOOL willStreamLoadData;
 @property (readonly) BOOL isDataLoaded;
 @property (assign) NSInteger saveType;
@@ -49,13 +49,13 @@
 - (void) initHeader;
 - (BOOL) loadData:(NSURL *)theURL;
 - (void) loadDataOnThread:(id)object;
-- (NSString *) title;
-- (NSString *) code;
+@property (readonly, copy) NSString *title;
+@property (readonly, copy) NSString *code;
 - (NSString *) banner:(const UInt16 *)UTF16TextBuffer;
-- (NSString *) internalName;
-- (NSString *) serial;
-- (NSString *) developerName;
-- (NSString *) developerNameAndCode;
+@property (readonly, copy) NSString *internalName;
+@property (readonly, copy) NSString *serial;
+@property (readonly, copy) NSString *developerName;
+@property (readonly, copy) NSString *developerNameAndCode;
 - (NSString *) unitCodeStringUsingID:(NSInteger)unitCodeID;
 - (NSImage *) icon;
 - (void) handleAdvansceneDatabaseInfo;

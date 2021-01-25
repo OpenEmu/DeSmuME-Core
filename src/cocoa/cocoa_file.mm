@@ -238,7 +238,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 			NSString *destinationPath = [[destinationURL path] stringByAppendingPathExtension:@FILE_EXT_ROM_SAVE];
 			NSFileManager *fileManager = [[NSFileManager alloc] init];
 			result = [fileManager copyItemAtPath:[romSaveURL path] toPath:destinationPath error:nil];
-			[fileManager release];
 			break;
 		}
 #endif
@@ -294,7 +293,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	exists = [fileManager isReadableFileAtPath:romSavePath];
-	[fileManager release];
 	
 	return exists;
 }
@@ -312,7 +310,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	exists = [fileManager isReadableFileAtPath:romSavePath];
-	[fileManager release];
 	
 	return exists;
 }
@@ -734,7 +731,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	result = [fileManager fileExistsAtPath:filePath];
-	[fileManager release];
 	
 	return result;
 }
@@ -940,7 +936,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	exists = [fileManager isReadableFileAtPath:saveStateFilePath];
-	[fileManager release];
 	
 	return exists;
 }
@@ -1122,7 +1117,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	result = [fileManager createDirectoryAtPath:tempPath withIntermediateDirectories:YES attributes:nil error:NULL];
 #endif
 	
-	[fileManager release];
 	return result;
 }
 
@@ -1153,7 +1147,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	result = [fileManager moveItemAtPath:filePath toPath:newLocationPath error:nil];
-	[fileManager release];
 	
 	return result;
 }
@@ -1178,7 +1171,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	
 	NSFileManager *fileManager = [[NSFileManager alloc] init];
 	result = [fileManager copyItemAtPath:filePath toPath:newLocationPath error:nil];
-	[fileManager release];
 	
 	return result;
 }
@@ -1204,14 +1196,12 @@ static NSMutableDictionary *_gURLDictionary = nil;
 	NSArray *fileList = [fileManager contentsOfDirectoryAtPath:directoryPath error:nil];
 	if (fileList == nil)
 	{
-		[fileManager release];
 		return outArray;
 	}
 	
 	outArray = [NSMutableArray arrayWithCapacity:100];
 	if (outArray == nil)
 	{
-		[fileManager release];
 		return outArray;
 	}
 	
@@ -1242,8 +1232,6 @@ static NSMutableDictionary *_gURLDictionary = nil;
 		
 		[outArray addObject:finalDict];
 	}
-	
-	[fileManager release];
 	
 	return outArray;
 }

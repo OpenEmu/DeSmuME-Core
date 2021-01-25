@@ -88,8 +88,8 @@ SineWaveGenerator sineWaveGenerator(250.0, MIC_SAMPLE_RATE);
 	micMode = MICMODE_NONE;
 	selectedAudioFileGenerator = NULL;
 	CAInputDevice = new CoreAudioInput;
-	CAInputDevice->SetCallbackHardwareStateChanged(&CAHardwareStateChangedCallback, self, NULL);
-	CAInputDevice->SetCallbackHardwareGainChanged(&CAHardwareGainChangedCallback, self, NULL);
+	CAInputDevice->SetCallbackHardwareStateChanged(&CAHardwareStateChangedCallback, (__bridge void*)self, NULL);
+	CAInputDevice->SetCallbackHardwareGainChanged(&CAHardwareGainChangedCallback, (__bridge void*)self, NULL);
 	softwareMicSampleGenerator = &nullSampleGenerator;
 	touchLocation = NSMakePoint(0.0f, 0.0f);
 	paddleAdjust = 0;
@@ -99,8 +99,8 @@ SineWaveGenerator sineWaveGenerator(250.0, MIC_SAMPLE_RATE);
 	hardwareMicManufacturerString = @"No hardware input detected.";
 	hardwareMicSampleRateString = @"No hardware input detected.";
 	
-	Mic_SetResetCallback(&CAResetCallback, self, NULL);
-	Mic_SetSampleReadCallback(&CASampleReadCallback, self, NULL);
+	Mic_SetResetCallback(&CAResetCallback, (__bridge void*)self, NULL);
+	Mic_SetSampleReadCallback(&CASampleReadCallback, (__bridge void*)self, NULL);
 	
 	return self;
 }
@@ -109,7 +109,6 @@ SineWaveGenerator sineWaveGenerator(250.0, MIC_SAMPLE_RATE);
 {
 	delete CAInputDevice;
 	delete _hwMicLevelList;
-	[super dealloc];
 }
 
 - (BOOL) isHardwareMicAvailable
@@ -592,10 +591,10 @@ SineWaveGenerator sineWaveGenerator(250.0, MIC_SAMPLE_RATE);
 	else
 	{
 		[self setHardwareMicInfoString:[NSString stringWithFormat:@"%@\nSample Rate: %1.1f Hz",
-										(NSString *)deviceInfo->name,
+										(__bridge NSString *)deviceInfo->name,
 										(double)deviceInfo->sampleRate]];
-		[self setHardwareMicNameString:(NSString *)deviceInfo->name];
-		[self setHardwareMicManufacturerString:(NSString *)deviceInfo->manufacturer];
+		[self setHardwareMicNameString:(__bridge NSString *)deviceInfo->name];
+		[self setHardwareMicManufacturerString:(__bridge NSString *)deviceInfo->manufacturer];
 		[self setHardwareMicSampleRateString:[NSString stringWithFormat:@"%1.1f Hz", (double)deviceInfo->sampleRate]];
 	}
 	
@@ -622,13 +621,13 @@ SineWaveGenerator sineWaveGenerator(250.0, MIC_SAMPLE_RATE);
 
 void CAResetCallback(void *inParam1, void *inParam2)
 {
-	CocoaDSController *cdsController = (CocoaDSController *)inParam1;
+	CocoaDSController *cdsController = (__bridge CocoaDSController *)inParam1;
 	[cdsController CAInputDevice]->Start();
 }
 
 uint8_t CASampleReadCallback(void *inParam1, void *inParam2)
 {
-	CocoaDSController *cdsController = (CocoaDSController *)inParam1;
+	CocoaDSController *cdsController = (__bridge CocoaDSController *)inParam1;
 	return [cdsController handleMicSampleRead:[cdsController CAInputDevice] softwareMic:[cdsController softwareMicSampleGenerator]];
 }
 
@@ -638,7 +637,7 @@ void CAHardwareStateChangedCallback(CoreAudioInputDeviceInfo *deviceInfo,
 									void *inParam1,
 									void *inParam2)
 {
-	CocoaDSController *cdsController = (CocoaDSController *)inParam1;
+	CocoaDSController *cdsController = (__bridge CocoaDSController *)inParam1;
 	[cdsController handleMicHardwareStateChanged:(CoreAudioInputDeviceInfo *)deviceInfo
 									   isEnabled:((isHardwareEnabled) ? YES : NO)
 										isLocked:((isHardwareLocked) ? YES : NO)];
@@ -646,6 +645,6 @@ void CAHardwareStateChangedCallback(CoreAudioInputDeviceInfo *deviceInfo,
 
 void CAHardwareGainChangedCallback(float normalizedGain, void *inParam1, void *inParam2)
 {
-	CocoaDSController *cdsController = (CocoaDSController *)inParam1;
+	CocoaDSController *cdsController = (__bridge CocoaDSController *)inParam1;
 	[cdsController handleMicHardwareGainChanged:normalizedGain];
 }

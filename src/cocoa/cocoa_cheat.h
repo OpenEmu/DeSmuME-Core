@@ -43,30 +43,30 @@ class CHEATSEARCH;
 	pthread_mutex_t mutexData;
 	
 	CocoaDSCheatItem *workingCopy;
-	CocoaDSCheatItem *parent;
+	CocoaDSCheatItem *__weak parent;
 }
 
 @property (assign) CHEATS_LIST *data;
 @property (assign) BOOL willAdd;
 @property (assign, nonatomic) BOOL enabled;
 @property (assign, nonatomic) NSInteger cheatType;
-@property (assign, nonatomic) NSImage *cheatTypeIcon;
+@property (strong, nonatomic) NSImage *cheatTypeIcon;
 @property (assign, nonatomic) BOOL isSupportedCheatType;
 @property (assign, nonatomic) NSInteger freezeType;
-@property (assign, nonatomic) NSString *description;
+@property (copy, nonatomic) NSString *description;
 @property (assign, nonatomic) NSUInteger codeCount;
-@property (assign, nonatomic) NSString *code;
+@property (copy, nonatomic) NSString *code;
 @property (assign, nonatomic) UInt8 bytes;
 @property (assign, nonatomic) UInt32 memAddress;
-@property (assign, nonatomic) NSString *memAddressString;
-@property (assign, nonatomic) NSString *memAddressSixDigitString;
+@property (copy, nonatomic) NSString *memAddressString;
+@property (copy, nonatomic) NSString *memAddressSixDigitString;
 @property (assign, nonatomic) SInt64 value;
-@property (readonly) CocoaDSCheatItem *workingCopy;
-@property (assign) CocoaDSCheatItem *parent;
+@property (readonly, strong) CocoaDSCheatItem *workingCopy;
+@property (weak) CocoaDSCheatItem *parent;
 
 - (id) initWithCheatData:(CHEATS_LIST *)cheatData;
 - (BOOL) retainData;
-- (char *) descriptionCString;
+@property (readonly) char *descriptionCString NS_RETURNS_INNER_POINTER;
 - (void) update;
 - (CocoaDSCheatItem *) createWorkingCopy;
 - (void) destroyWorkingCopy;
@@ -75,12 +75,9 @@ class CHEATSEARCH;
 - (void) setDataWithDictionary:(NSDictionary *)dataDict;
 - (NSDictionary *) dataDictionary;
 
-+ (void) setIconInternalCheat:(NSImage *)iconImage;
-+ (NSImage *) iconInternalCheat;
-+ (void) setIconActionReplay:(NSImage *)iconImage;
-+ (NSImage *) iconActionReplay;
-+ (void) setIconCodeBreaker:(NSImage *)iconImage;
-+ (NSImage *) iconCodeBreaker;
+@property (class, strong) NSImage *iconInternalCheat;
+@property (class, strong) NSImage *iconActionReplay;
+@property (class, strong) NSImage *iconCodeBreaker;
 
 @end
 
@@ -106,7 +103,7 @@ class CHEATSEARCH;
 }
 
 @property (readonly) CHEATS *listData;
-@property (readonly) NSMutableArray *list;
+@property (readonly, strong) NSMutableArray *list;
 @property (assign) pthread_rwlock_t *rwlockCoreExecute;
 @property (assign) NSUInteger untitledCount;
 @property (copy) NSString *dbTitle;
@@ -145,7 +142,7 @@ class CHEATSEARCH;
 }
 
 @property (readonly) CHEATSEARCH *listData;
-@property (readonly) NSMutableArray *addressList;
+@property (readonly, strong) NSMutableArray<NSDictionary<NSString*,id>*> *addressList;
 @property (assign) pthread_rwlock_t *rwlockCoreExecute;
 @property (readonly) NSUInteger searchCount;
 
@@ -155,7 +152,7 @@ class CHEATSEARCH;
 - (void) runComparativeSearchOnThread:(id)object;
 - (void) reset;
 
-+ (NSMutableArray *) addressListWithListObject:(CHEATSEARCH *)addressList maxItems:(NSUInteger)maxItemCount;
++ (NSMutableArray<NSDictionary<NSString*,id>*> *) addressListWithListObject:(CHEATSEARCH *)addressList maxItems:(NSUInteger)maxItemCount;
 
 @end
 

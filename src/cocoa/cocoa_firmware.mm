@@ -52,7 +52,6 @@
 	if (internalData == nil)
 	{
 		pthread_mutex_destroy(&mutex);
-		[self release];
 		return nil;
 	}
 	
@@ -78,7 +77,6 @@
 	if (fwData == nil)
 	{
 		pthread_mutex_destroy(&mutex);
-		[self release];
 		return nil;
 	}
 	
@@ -87,8 +85,6 @@
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setDateFormat:@"Y"];
 	birth_year = [[dateFormatter stringFromDate:now] integerValue];
-	[dateFormatter release];
-	[now release];
 	
 	internalData = NULL;
 	data = fwData;
@@ -102,8 +98,6 @@
 	internalData = NULL;
 		
 	pthread_mutex_destroy(&mutex);
-	
-	[super dealloc];
 }
 
 - (void) setConsoleType:(NSInteger)theType
@@ -157,7 +151,7 @@
 - (NSString *) nickname
 {
 	pthread_mutex_lock(&mutex);
-	NSString *theNickname = [[[NSString alloc] initWithBytes:&data->nickname[0] length:(sizeof(UInt16) * data->nickname_len) encoding:NSUTF16LittleEndianStringEncoding] autorelease];
+	NSString *theNickname = [[NSString alloc] initWithBytes:&data->nickname[0] length:(sizeof(UInt16) * data->nickname_len) encoding:NSUTF16LittleEndianStringEncoding];
 	pthread_mutex_unlock(&mutex);
 	
 	return theNickname;
@@ -198,7 +192,7 @@
 - (NSString *) message
 {
 	pthread_mutex_lock(&mutex);
-	NSString *theMessage = [[[NSString alloc] initWithBytes:&data->message[0] length:(sizeof(UInt16) * data->message_len) encoding:NSUTF16LittleEndianStringEncoding] autorelease];
+	NSString *theMessage = [[NSString alloc] initWithBytes:&data->message[0] length:(sizeof(UInt16) * data->message_len) encoding:NSUTF16LittleEndianStringEncoding];
 	pthread_mutex_unlock(&mutex);
 	
 	return theMessage;
@@ -237,8 +231,6 @@
 		[dateFormatter setDateFormat:@"Y"];
 		NSInteger theYear = [[dateFormatter stringFromDate:theDate] integerValue];
 		
-		[dateFormatter release];
-		
 		data->birth_month = (u8)theMonth;
 		data->birth_day = (u8)theDay;
 		birth_year = theYear;
@@ -256,7 +248,14 @@
 - (NSDate *) birthday
 {
 	pthread_mutex_lock(&mutex);
-	NSDate *theBirthday = [NSDate dateWithString:[NSString stringWithFormat:@"%ld-%ld-%ld 12:00:00 +0000", (unsigned long)birth_year, (unsigned long)data->birth_month, (unsigned long)data->birth_day]];
+	NSDateComponents *components = [[NSDateComponents alloc] init];
+	components.year = birth_year;
+	components.month = data->birth_month;
+	components.day = data->birth_day;
+	components.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+	components.hour = 12;
+	NSCalendar *cal = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
+	NSDate *theBirthday = [cal dateFromComponents:components];
 	pthread_mutex_unlock(&mutex);
 	
 	return theBirthday;

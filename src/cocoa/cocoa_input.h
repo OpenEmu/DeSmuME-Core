@@ -115,7 +115,7 @@ typedef struct
 	OSSpinLock spinlockControllerState;
 }
 
-@property (retain) id <CocoaDSControllerDelegate> delegate;
+@property (strong) id <CocoaDSControllerDelegate> delegate;
 @property (assign) BOOL autohold;
 @property (readonly) BOOL isHardwareMicAvailable;
 @property (readonly) BOOL isHardwareMicIdle;
@@ -129,14 +129,14 @@ typedef struct
 @property (assign) BOOL softwareMicState;
 @property (assign) NSInteger softwareMicMode;
 @property (assign) NSInteger micMode;
-@property (readonly) CoreAudioInput *CAInputDevice;
-@property (readonly) AudioGenerator *softwareMicSampleGenerator;
+@property (readonly, strong) CoreAudioInput *CAInputDevice;
+@property (readonly, strong) AudioGenerator *softwareMicSampleGenerator;
 @property (assign) AudioSampleBlockGenerator *selectedAudioFileGenerator;
 @property (assign) NSInteger paddleAdjust;
-@property (retain) NSString *hardwareMicInfoString;
-@property (retain) NSString *hardwareMicNameString;
-@property (retain) NSString *hardwareMicManufacturerString;
-@property (retain) NSString *hardwareMicSampleRateString;
+@property (copy) NSString *hardwareMicInfoString;
+@property (copy) NSString *hardwareMicNameString;
+@property (copy) NSString *hardwareMicManufacturerString;
+@property (copy) NSString *hardwareMicSampleRateString;
 
 - (void) setControllerState:(BOOL)theState controlID:(const NSUInteger)controlID;
 - (void) setControllerState:(BOOL)theState controlID:(const NSUInteger)controlID turbo:(const BOOL)isTurboEnabled;

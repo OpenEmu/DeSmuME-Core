@@ -24,9 +24,6 @@
 
 
 @interface CocoaDSFile : NSDocument
-{
-
-}
 
 + (NSMutableDictionary *) URLDictionary;
 + (void) addURLToURLDictionary:(NSURL *)theURL groupKey:(NSString *)groupKey fileKind:(NSString *)fileKind;
