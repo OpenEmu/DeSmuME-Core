@@ -314,9 +314,9 @@ WifiComInterface* wifiCom;
 
 #if (WIFI_LOGGING_LEVEL >= 1)
 	#if WIFI_LOG_USE_LOGC
-		#define WIFI_LOG(level, ...) if(level <= WIFI_LOGGING_LEVEL) LOGC(8, "WIFI: "__VA_ARGS__);
+		#define WIFI_LOG(level, ...) if(level <= WIFI_LOGGING_LEVEL) LOGC(8, "WIFI: " __VA_ARGS__);
 	#else
-		#define WIFI_LOG(level, ...) if(level <= WIFI_LOGGING_LEVEL) printf("WIFI: "__VA_ARGS__);
+		#define WIFI_LOG(level, ...) if(level <= WIFI_LOGGING_LEVEL) printf("WIFI: " __VA_ARGS__);
 	#endif
 #else
 #define WIFI_LOG(level, ...) {}
@@ -329,7 +329,7 @@ WifiComInterface* wifiCom;
  *******************************************************************************/
 
 // TODO: find the right value
-// GBAtek says it is 10µs, however that value seems too small
+// GBAtek says it is 10Âµs, however that value seems too small
 // (MP host sends floods of data frames, clients can't keep up)
 // 100 would make more sense since CMDCOUNT is set to 166
 // that would be 16.6ms ~= 1 frame
@@ -1283,7 +1283,7 @@ void WIFI_write16(u32 address, u16 val)
 			wifiMac.eCountEnable = BIT0(val);
 			break;
 		case REG_WIFI_EXTRACOUNT:
-			WIFI_LOG(3, "EXTRACOUNT=%i (%i µs)\n", val, val*WIFI_CMDCOUNT_SLICE);
+			WIFI_LOG(3, "EXTRACOUNT=%i (%i ï¿½s)\n", val, val*WIFI_CMDCOUNT_SLICE);
 			wifiMac.eCount = (u32)val * WIFI_CMDCOUNT_SLICE;
 			break;
 		case REG_WIFI_LISTENINT:
