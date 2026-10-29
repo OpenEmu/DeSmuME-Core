@@ -129,8 +129,11 @@ typedef struct
 @property (assign) BOOL softwareMicState;
 @property (assign) NSInteger softwareMicMode;
 @property (assign) NSInteger micMode;
-@property (readonly, strong) CoreAudioInput *CAInputDevice;
-@property (readonly, strong) AudioGenerator *softwareMicSampleGenerator;
+// CoreAudioInput and AudioGenerator are C++ classes, not Objective-C objects:
+// they are created with new and owned by this object, so ARC must not manage
+// them. Declaring them 'strong' is rejected under ARC.
+@property (readonly, assign) CoreAudioInput *CAInputDevice;
+@property (readonly, assign) AudioGenerator *softwareMicSampleGenerator;
 @property (assign) AudioSampleBlockGenerator *selectedAudioFileGenerator;
 @property (assign) NSInteger paddleAdjust;
 @property (copy) NSString *hardwareMicInfoString;
